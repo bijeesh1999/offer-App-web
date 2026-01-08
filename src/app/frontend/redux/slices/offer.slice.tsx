@@ -17,11 +17,8 @@ export interface Offer {
   _id: string;
   name: string;
   type: string;
-  priority: number;
-  config: any;
-  startDate: string;
-  endDate: string;
-  isActive:boolean
+  priority?: number; // Add the '?' to allow undefined
+  // isActive: boolean;
 }
 
 interface CreateOfferPayload {

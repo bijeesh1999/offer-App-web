@@ -7,16 +7,16 @@ import {
   updateProduct,
 } from "../../services/product.service";
 
-// 1. Define the Product Interface
 export interface Product {
   _id: string;
   name: string;
   price: number;
-  image: string;
   quantity: number;
-  offers?: string[];
-  createdAt?: string;
-  isActive:boolean;
+  // Change this:
+  // offers?: [offer:{name: string}]; 
+  // To this (Array of objects):
+  offers?: []; 
+  isActive: boolean;
 }
 
 // 2. Define the State Interface
