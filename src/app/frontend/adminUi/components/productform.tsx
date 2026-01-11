@@ -54,8 +54,7 @@ const ProductFormDrawer: React.FC<ProductFormDrawerProps> = ({
 }) => {
   const dispatch = useDispatch();
   const fileInputRef = useRef<HTMLInputElement>(null); // Fixed missing ref
-
-  // const { image, fileStatus } = useSelector((state: any) => state.products);
+  const [submit, setSubmit] = React.useState(false);
 
   const { fileStatus, image } = useSelector((state: any) => state.products);
 
@@ -70,25 +69,43 @@ const ProductFormDrawer: React.FC<ProductFormDrawerProps> = ({
       offers: [],
     },
     validationSchema: ProductSchema,
-    onSubmit: (values) => {
-      let uploadedImageUrl = "";
-      if (values.image instanceof File) {
-        // .unwrap() allows us to get the actual result (UploadResponse)
-        const result = (dispatch as any)(uploadFile(values.image)).unwrap();
-        uploadedImageUrl = result.url;
-      }
+    // 1. Mark the function as async
+    onSubmit: async (values) => {
+      try {
+        let finalImageUrl = "";
 
-      if (fileStatus === "created") {
-        (dispatch as any)(createNewProduct({ ...values, image: image } as any));
-        formik.resetForm();
+        // 2. Handle the File Upload first
+        if (values.image instanceof File) {
+          // We await the result. result will be of type UploadResponse (e.g., { url: string })
+          const result = await (dispatch as any)(
+            uploadFile(values.image)
+          ).unwrap();
+          finalImageUrl = result.url;
+        }
+      } catch (error) {
+        // This catches errors from either uploadFile OR createNewProduct
+        console.error("Submission sequence failed:", error);
       }
-      onClose();
     },
   });
 
-  console.log({ file: formik.values });
+  console.log({ submit });
 
-  // Added missing file handlers
+  React.useEffect(() => {
+    if (fileStatus === "created") {
+      const productPayload = {
+        ...formik.values,
+        image: image, // Pass the string URL from the server, not the File object
+      };
+      // Wait for product creation to finish
+      (dispatch as any)(createNewProduct(productPayload as any)).unwrap();
+
+      formik.resetForm();
+      onClose();
+    }
+  }, [fileStatus]);
+
+  // Added missing f,[ile handlers
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0];
     if (file) {

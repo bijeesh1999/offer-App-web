@@ -7,7 +7,6 @@ const RoleSelection = () => {
   // Navigation handler (Replace with your router logic, e.g., useNavigate from react-router-dom)
   const router = useRouter()
   const handleRedirection = (role:any) => {
-    console.log(`Redirecting to ${role} dashboard...`);
     router.push(`frontend/${role}`)
   };
 

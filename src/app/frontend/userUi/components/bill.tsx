@@ -45,7 +45,6 @@ const BillSummaryDialog: React.FC<Props> = ({ isOpen, billData, onClose }) => {
 
   if (!isOpen || !billData) return null;
 
-  console.log({ billData });
 
   // Helper to get product name from Redux store based on bill productId
   const getProductDetails = (id: any) => {

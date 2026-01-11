@@ -5,7 +5,6 @@ const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/bill`;
 
 // Create Bill
 export const createBill = async (body:any) => {
-  console.log({ body });
 
   try {
     const res = await axios.post(`${API_BASE_URL}`, body, {
@@ -21,7 +20,6 @@ export const createBill = async (body:any) => {
 export const findAllOffers = async () => {
   try {
     const res = await axios.get(`${API_BASE_URL}`, { withCredentials: true });
-    console.log({res});
     
     return res;
   } catch (error) {

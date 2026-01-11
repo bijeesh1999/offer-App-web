@@ -121,7 +121,7 @@ const AdminPanel = () => {
               <tbody className="divide-y divide-gray-100">
                 {activeTab === "products"
                   ? products?.map((p: Product) => (
-                      <tr key={p._id} className="hover:bg-gray-50 transition-colors">
+                      <tr key={p?._id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4 font-medium text-gray-800">{p.name}</td>
                         <td className="px-6 py-4 text-gray-600">${p.price}</td>
                         <td className="px-6 py-4 text-gray-600">{p.quantity} units</td>
