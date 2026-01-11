@@ -7,9 +7,7 @@ import {
 import { AxiosResponse } from "axios"; // Add this import for typing API responses
 import {
   createOffer,
-  deleteOffer,
   findAllOffers,
-  updateOffer,
 } from "../../services/offer.service";
 
 // 1. Define the Shape of an Offer
@@ -65,21 +63,21 @@ export const listOffer = createAsyncThunk<Offer[]>(
   }
 );
 
-export const putOneOffer = createAsyncThunk<Offer, { id: string; limitCents: number }>(
-  "offer/update",
-  async ({ id, limitCents }) => {
-    const res = await updateOffer({ id, body: { limitCents } }) as AxiosResponse<Offer>;  // Wrap limitCents in body object
-    return res.data;
-  }
-);
+// export const putOneOffer = createAsyncThunk<Offer, { id: string; limitCents: number }>(
+//   "offer/update",
+//   async ({ id, limitCents }) => {
+//     const res = await updateOffer({ id, body: { limitCents } }) as AxiosResponse<Offer>;  // Wrap limitCents in body object
+//     return res.data;
+//   }
+// );
 
-export const deleteOneOffer = createAsyncThunk<string, string>(
-  "offer/delete", 
-  async (id) => {
-    await deleteOffer(id);
-    return id; 
-  }
-);
+// export const deleteOneOffer = createAsyncThunk<string, string>(
+//   "offer/delete", 
+//   async (id) => {
+//     await deleteOffer(id);
+//     return id; 
+//   }
+// );
 
 const offerSlice = createSlice({
   name: "offers",
@@ -119,21 +117,21 @@ const offerSlice = createSlice({
       })
       
       // Update Offer
-      .addCase(putOneOffer.fulfilled, (state, action: PayloadAction<Offer>) => {
-        state.isLoading = false;
-        state.status = "updated";
-        const index = state.offers.findIndex(o => o._id === action.payload._id);
-        if (index !== -1) {
-          state.offers[index] = action.payload;
-        }
-      })
+      // .addCase(putOneOffer.fulfilled, (state, action: PayloadAction<Offer>) => {
+      //   state.isLoading = false;
+      //   state.status = "updated";
+      //   const index = state.offers.findIndex(o => o._id === action.payload._id);
+      //   if (index !== -1) {
+      //     state.offers[index] = action.payload;
+      //   }
+      // })
       
       // Delete Offer
-      .addCase(deleteOneOffer.fulfilled, (state, action: PayloadAction<string>) => {
-        state.isLoading = false;
-        state.status = "deleted";
-        state.offers = state.offers.filter(o => o._id !== action.payload);
-      })
+      // .addCase(deleteOneOffer.fulfilled, (state, action: PayloadAction<string>) => {
+      //   state.isLoading = false;
+      //   state.status = "deleted";
+      //   state.offers = state.offers.filter(o => o._id !== action.payload);
+      // })
 
       // Global Matcher for any rejected offer actions
       .addMatcher(

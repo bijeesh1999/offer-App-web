@@ -17,10 +17,11 @@ interface Product {
 
 interface BillItem {
   _id: string;
-  productId: string;
+  product: Product;
   quantity: number;
   finalPrice: number;
   discountAmount: number;
+  appliedOffer: any;
 }
 
 interface BillData {
@@ -87,7 +88,6 @@ const BillSummaryDialog: React.FC<Props> = ({ isOpen, billData, onClose }) => {
               Order Items
             </p>
             {billData.items.map((item) => {
-              const details = getProductDetails(item.productId);
               return (
                 <div key={item._id} className="flex items-center gap-3">
                   <div className="bg-gray-50 p-2 rounded-lg">
@@ -95,7 +95,7 @@ const BillSummaryDialog: React.FC<Props> = ({ isOpen, billData, onClose }) => {
                   </div>
                   <div className="flex-1">
                     <h4 className="text-sm font-bold text-gray-800">
-                      {details.name}
+                      {item?.product?.name}
                     </h4>
                     <p className="text-[10px] text-gray-500">
                       Qty: {item.quantity}
@@ -111,6 +111,18 @@ const BillSummaryDialog: React.FC<Props> = ({ isOpen, billData, onClose }) => {
                       </p>
                     )}
                   </div>
+                  {item?.appliedOffer && (
+                    <div className="mt-2 p-2 bg-green-50 border-l-4 border-green-500 rounded-r-md">
+                      <p className="text-xs font-bold text-green-700 uppercase tracking-wide">
+                        Offer
+                      </p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-green-800">
+                          {item?.appliedOffer.name || "Discount Applied"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}

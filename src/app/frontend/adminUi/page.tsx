@@ -120,7 +120,7 @@ const AdminPanel = () => {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {activeTab === "products"
-                  ? products.map((p: Product) => (
+                  ? products?.map((p: Product) => (
                       <tr key={p._id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4 font-medium text-gray-800">{p.name}</td>
                         <td className="px-6 py-4 text-gray-600">${p.price}</td>
@@ -172,7 +172,7 @@ const AdminPanel = () => {
                         </td>
                       </tr>
                     ))
-                  : offersData.map((o: Offer) => (
+                  : offersData?.map((o: Offer) => (
                       <tr key={o._id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4 font-medium text-gray-800">{o.name}</td>
                         <td className="px-6 py-4 text-blue-600 font-semibold">{o.type}</td>

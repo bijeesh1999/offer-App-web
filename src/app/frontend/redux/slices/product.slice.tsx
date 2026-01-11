@@ -2,70 +2,92 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AxiosResponse } from "axios"; // Add this import for typing API responses
 import {
   createProduct,
-  deleteProduct,
+  fileUpload,
   findAllProducts,
-  updateProduct,
 } from "../../services/product.service";
 
 export interface Product {
   _id: string;
   name: string;
+  image: string;
   price: number;
   quantity: number;
-  // Change this:
-  // offers?: [offer:{name: string}]; 
+  // offers?: [offer:{name: string}];
   // To this (Array of objects):
-  offers?: []; 
+  offers?: [];
   isActive: boolean;
 }
 
 // 2. Define the State Interface
 interface ProductState {
   products: Product[];
+  image: "";
   currentProduct: Product | null;
-  status: "idle" | "loading" | "created" | "success" | "updated" | "deleted" | "fail";
+  status:
+    | "idle"
+    | "loading"
+    | "created"
+    | "success"
+    | "updated"
+    | "deleted"
+    | "fail";
+  fileStatus:
+    | "idle"
+    | "loading"
+    | "created"
+    | "success"
+    | "updated"
+    | "deleted"
+    | "fail";
   isLoading: boolean;
   error: string | null;
 }
 
 const initialState: ProductState = {
   products: [],
+  image: "",
   currentProduct: null,
   status: "idle",
+  fileStatus: "idle",
   isLoading: false,
   error: null,
 };
+
+// The response structure from your Cloudinary/S3/Server
+export interface UploadResponse {
+  url: string;
+}
 
 // 3. Typed Async Thunks
 export const createNewProduct = createAsyncThunk<Product, Partial<Product>>(
   "product/create",
   async (body) => {
-    const res = await createProduct(body) as AxiosResponse<Product>; // Cast to AxiosResponse<Product>
+    const res = (await createProduct(body)) as AxiosResponse<Product>; // Cast to AxiosResponse<Product>
     return res.data; // Adjusted to return res.data assuming axios structure
   }
 );
 
 export const listProduct = createAsyncThunk<Product[]>(
-  "product/list", 
+  "product/list",
   async () => {
-    const res = await findAllProducts() as AxiosResponse<Product[]>; // Cast to AxiosResponse<Product[]>
-    return res.data; 
-  }
-);
-
-export const putOneProduct = createAsyncThunk<Product, { id: string; updateData: any }>(
-  "product/update",
-  async ({ id, updateData }) => {
-    const res = await updateProduct({ id, ...updateData }) as AxiosResponse<Product>; // Cast to AxiosResponse<Product>
+    const res = (await findAllProducts()) as AxiosResponse<Product[]>; // Cast to AxiosResponse<Product[]>
     return res.data;
   }
 );
 
-export const deleteOneProduct = createAsyncThunk<string, string>(
-  "product/delete",
-  async (id) => {
-    await deleteProduct(id);
-    return id; // Return ID to filter from state
+export const uploadFile = createAsyncThunk<UploadResponse, File>(
+  "file/upload",
+  async (file, thunkAPI) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", file); // Binary file is attached here
+
+      // Pass formData directly to the service
+      const response = await fileUpload(formData);
+      return response;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error);
+    }
   }
 );
 
@@ -76,7 +98,7 @@ const ProductSlice = createSlice({
     resetProductStatus: (state) => {
       state.status = "idle";
       state.error = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -85,36 +107,44 @@ const ProductSlice = createSlice({
         state.status = "loading";
         state.isLoading = true;
       })
-      .addCase(createNewProduct.fulfilled, (state, action: PayloadAction<Product>) => {
-        state.status = "created";
-        state.products.push(action.payload);
-        state.isLoading = false;
-      })
+      .addCase(
+        createNewProduct.fulfilled,
+        (state, action: PayloadAction<Product>) => {
+          state.status = "created";
+          state.products.push(action.payload);
+          state.isLoading = false;
+        }
+      )
       .addCase(createNewProduct.rejected, (state, action) => {
         state.status = "fail";
         state.error = action.error.message || "Failed to create";
         state.isLoading = false;
       })
-      
+
       // List
-      .addCase(listProduct.fulfilled, (state, action: PayloadAction<Product[]>) => {
-        state.status = "success";
-        state.products = action.payload;
+      .addCase(
+        listProduct.fulfilled,
+        (state, action: PayloadAction<Product[]>) => {
+          state.status = "success";
+          state.products = action.payload;
+          state.isLoading = false;
+        }
+      )
+
+      // file upload
+
+      .addCase(uploadFile.pending, (state) => {
+        state.status = "loading";
+        state.isLoading = true;
+      })
+      .addCase(uploadFile.fulfilled, (state, action: PayloadAction<any>) => {
+        state.fileStatus = "created";
+        state.image = action.payload?.fileUrl;
         state.isLoading = false;
       })
-      
-      // Update
-      .addCase(putOneProduct.fulfilled, (state, action: PayloadAction<Product>) => {
-        state.status = "updated";
-        const index = state.products.findIndex(p => p._id === action.payload._id);
-        if (index !== -1) state.products[index] = action.payload;
-        state.isLoading = false;
-      })
-      
-      // Delete
-      .addCase(deleteOneProduct.fulfilled, (state, action: PayloadAction<string>) => {
-        state.status = "deleted";
-        state.products = state.products.filter(p => p._id !== action.payload);
+      .addCase(uploadFile.rejected, (state, action) => {
+        state.status = "fail";
+        state.error = action.error.message || "Failed to create";
         state.isLoading = false;
       });
   },
